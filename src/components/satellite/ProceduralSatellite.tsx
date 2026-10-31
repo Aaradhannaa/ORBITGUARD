@@ -41,7 +41,7 @@ export const ProceduralSatellite: React.FC<ProceduralSatelliteProps> = ({
       const targetRotZ = (attitude.roll * Math.PI) / 180;
 
       // Gentle orbital attitude stabilization drift
-      const orbitalDrift = prefersReducedMotion ? 0 : state.clock.getElapsedTime() * 0.035;
+      const orbitalDrift = prefersReducedMotion ? 0 : state.clock.getElapsedTime() * 0.12;
       const impactWobble = hasImpactDisturbance && !prefersReducedMotion
         ? Math.sin(state.clock.elapsedTime * 15) * 0.18 * Math.exp(-0.06 * (state.clock.elapsedTime % 12))
         : 0;
@@ -49,17 +49,17 @@ export const ProceduralSatellite: React.FC<ProceduralSatelliteProps> = ({
       satelliteGroupRef.current.rotation.x = THREE.MathUtils.lerp(
         satelliteGroupRef.current.rotation.x,
         targetRotX + impactWobble,
-        0.08
+        0.14
       );
       satelliteGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         satelliteGroupRef.current.rotation.y,
         targetRotY + orbitalDrift,
-        0.06
+        0.12
       );
       satelliteGroupRef.current.rotation.z = THREE.MathUtils.lerp(
         satelliteGroupRef.current.rotation.z,
         targetRotZ + impactWobble * 0.6,
-        0.08
+        0.14
       );
     }
 

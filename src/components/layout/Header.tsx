@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMission } from '../../context/MissionContext';
 import { NavTab } from './Sidebar';
-import { backendClient } from '../../services/backendClient';
+import { backendClient, isBackendEnabled } from '../../services/backendClient';
 import { 
   Satellite, 
   Clock, 
@@ -27,6 +27,11 @@ export const Header: React.FC<HeaderProps> = ({ onSelectTab }) => {
   }, []);
 
   useEffect(() => {
+    if (!isBackendEnabled) {
+      setApiOnline(false);
+      return;
+    }
+
     let active = true;
     const checkBackend = async () => {
       try {
@@ -87,12 +92,12 @@ export const Header: React.FC<HeaderProps> = ({ onSelectTab }) => {
       <div className="flex items-center space-x-3 text-xs font-mono-tech">
         <div
           className="hidden md:flex items-center gap-1.5 rounded-full border border-[rgba(240,230,215,0.08)] bg-[#12161f] px-2.5 py-1.5 text-[9px] tracking-wide"
-          title={apiOnline ? 'Telemetry API connected' : apiOnline === false ? 'Telemetry API is offline; browser simulation remains active' : 'Checking telemetry API'}
+          title={!isBackendEnabled ? 'Public demo uses browser simulation only' : apiOnline ? 'Telemetry API connected' : apiOnline === false ? 'Telemetry API is offline; browser simulation remains active' : 'Checking telemetry API'}
           aria-live="polite"
         >
           <span className={`h-1.5 w-1.5 rounded-full ${apiOnline === true ? 'bg-emerald-400' : apiOnline === false ? 'bg-[#777d86]' : 'bg-amber-400 animate-pulse'}`} />
           <span className={apiOnline ? 'text-emerald-300' : 'text-[#8c939f]'}>
-            {apiOnline === true ? 'API ONLINE' : apiOnline === false ? 'API OFFLINE' : 'API CHECK'}
+            {!isBackendEnabled ? 'SIMULATION ONLY' : apiOnline === true ? 'API ONLINE' : apiOnline === false ? 'API OFFLINE' : 'API CHECK'}
           </span>
         </div>
 

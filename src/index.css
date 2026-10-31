@@ -333,6 +333,34 @@ button {
 .hero-caption span { color: #e5a27b; }
 .hero-caption i { width: 3px; height: 3px; border-radius: 50%; background: #a85d4a; }
 
+@media (max-width: 600px) {
+  .viewer-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .viewer-identity {
+    max-width: 100%;
+    padding: 6px 10px;
+  }
+
+  .viewer-identity > span:first-of-type {
+    font-size: 10px;
+    letter-spacing: .04em;
+  }
+
+  .viewer-presets {
+    align-self: flex-end;
+    max-width: 100%;
+    gap: 0;
+  }
+
+  .viewer-interaction {
+    display: none;
+  }
+}
+
 .mission-readout {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));

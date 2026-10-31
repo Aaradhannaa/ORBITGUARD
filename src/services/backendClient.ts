@@ -1,7 +1,11 @@
 import type { TelemetryPoint } from '../types/telemetry';
 import type { ImpactEvent } from '../types/events';
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL;
+export const isBackendEnabled = configuredApiBase !== 'disabled';
+const apiBase = isBackendEnabled
+  ? (configuredApiBase || 'http://localhost:8000').replace(/\/$/, '')
+  : '';
 
 export interface BackendHealth {
   status: 'ONLINE' | string;
@@ -37,6 +41,10 @@ function asApiSample(point: TelemetryPoint) {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!isBackendEnabled) {
+    throw new Error('OrbitGuard backend is disabled for this deployment');
+  }
+
   const response = await fetch(`${apiBase}${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...init?.headers },

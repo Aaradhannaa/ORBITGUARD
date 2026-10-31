@@ -1,0 +1,61 @@
+{
+  "dataset": "synthetic telemetry; generated at runtime",
+  "seed": 17,
+  "train_windows": 1125,
+  "test_windows": 375,
+  "accuracy": 0.816,
+  "labels": [
+    "impact",
+    "glitch",
+    "uncertain"
+  ],
+  "confusion_matrix_rows_actual_columns_predicted": [
+    [
+      110,
+      4,
+      11
+    ],
+    [
+      5,
+      87,
+      33
+    ],
+    [
+      8,
+      8,
+      109
+    ]
+  ],
+  "per_class": {
+    "impact": {
+      "precision": 0.8943,
+      "recall": 0.88,
+      "f1": 0.8871,
+      "support": 125
+    },
+    "glitch": {
+      "precision": 0.8788,
+      "recall": 0.696,
+      "f1": 0.7768,
+      "support": 125
+    },
+    "uncertain": {
+      "precision": 0.7124,
+      "recall": 0.872,
+      "f1": 0.7842,
+      "support": 125
+    }
+  },
+  "impact_false_positive_rate": 0.052,
+  "impact_true_positive_rate": 0.88,
+  "feature_names": [
+    "imu_peak_z",
+    "solar_peak_z",
+    "mag_peak_z",
+    "temp_peak_z",
+    "onset_spread_ms",
+    "channels_flagged",
+    "motion_power"
+  ],
+  "note": "Synthetic-data metrics only. Do not interpret as flight performance."
+}

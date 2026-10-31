@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useMission } from '../context/MissionContext';
-import { CubeSatViewer } from '../components/satellite/CubeSatViewer';
 import { SensorSparkline } from '../components/telemetry/SensorSparkline';
 import { SimulationToolbar } from '../components/telemetry/SimulationToolbar';
-import { Activity, ArrowUpRight, Compass, Sun, Zap, Radio, Thermometer } from 'lucide-react';
+import { Activity, ArrowUpRight, Box, Compass, Sun, Zap, Radio, Thermometer } from 'lucide-react';
+
+const CubeSatViewer = lazy(() =>
+  import('../components/satellite/CubeSatViewer').then(({ CubeSatViewer }) => ({ default: CubeSatViewer }))
+);
 
 interface MissionOverviewPageProps {
   onNavigateToDiagnosis: () => void;
@@ -14,10 +17,16 @@ export const MissionOverviewPage: React.FC<MissionOverviewPageProps> = ({
   onNavigateToDiagnosis,
   onNavigateToTelemetry
 }) => {
+  const [showSpacecraft, setShowSpacecraft] = useState(false);
   const { latestTelemetry, telemetryHistory, events, setSelectedEvent, hasImpactDisturbance } = useMission();
   const impactCount = events.filter((event) => event.classification === 'POSSIBLE_IMPACT').length;
   const glitchCount = events.filter((event) => event.classification === 'SENSOR_GLITCH').length;
   const recentEvents = events.slice(0, 3);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowSpacecraft(true), 500);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const sensors = [
     {
@@ -78,7 +87,35 @@ export const MissionOverviewPage: React.FC<MissionOverviewPageProps> = ({
 
       {/* The spacecraft is the mission's visual anchor. */}
       <div className="spacecraft-hero-stage">
-        <CubeSatViewer />
+        {showSpacecraft ? (
+          <Suspense
+            fallback={
+              <div
+                className="viewer-backdrop w-full h-full min-h-[460px] rounded-xl flex items-center justify-center text-sm text-[#9aa2ac]"
+                role="status"
+              >
+                Loading interactive spacecraft view…
+              </div>
+            }
+          >
+            <CubeSatViewer />
+          </Suspense>
+        ) : (
+          <div className="viewer-backdrop w-full h-full min-h-[460px] rounded-xl flex items-center justify-center">
+            <div className="text-center px-6">
+              <Box className="w-9 h-9 mx-auto text-[#d97742]" aria-hidden="true" />
+              <p className="mt-4 text-sm font-semibold text-[#f4f0e8]">Interactive 3D digital twin</p>
+              <p className="mt-1 text-xs text-[#8c939f]">Load the 3D scene when you want to explore it.</p>
+              <button
+                type="button"
+                onClick={() => setShowSpacecraft(true)}
+                className="mt-5 px-4 py-2.5 rounded-lg bg-[#d97742]/15 text-[#f4f0e8] border border-[#d97742]/40 hover:bg-[#d97742]/25 transition text-xs font-semibold"
+              >
+                Load interactive 3D view
+              </button>
+            </div>
+          </div>
+        )}
         <div className="hero-caption" aria-hidden="true">
           <span>OG—01</span><i /> LOW EARTH ORBIT <i /> DIGITAL TWIN
         </div>

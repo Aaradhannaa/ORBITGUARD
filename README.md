@@ -54,6 +54,18 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
+### Public demo hosting (GitHub Pages)
+
+The public demo is a frontend-only static site. The browser simulator remains active, while the API is deliberately disabled in the hosted build because the prototype API currently has unauthenticated write and delete endpoints. The public deployment therefore does not connect to or expose the SQLite backend.
+
+The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. To publish it:
+
+1. Push the `main` branch to GitHub.
+2. In the repository, open **Settings → Pages** and set the build and deployment source to **GitHub Actions**.
+3. Wait for the **Deploy OrbitGuard demo** workflow to complete.
+
+The site URL will be `https://jayanthv-git.github.io/OrbitGuard/`. Updates pushed to `main` redeploy automatically. The local app continues to use `http://localhost:8000` by default; only the Pages build disables backend requests.
+
 ### 2. Production Build
 ```bash
 npm run build
@@ -63,6 +75,17 @@ npm run preview
 ### 3. Start the backend API
 
 In a second terminal, from the project root:
+
+**Windows PowerShell**
+
+```powershell
+python -m venv backend\.venv
+backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\backend\.venv\Scripts\Activate.ps1
+npm run dev:backend
+```
+
+**macOS / Linux**
 
 ```bash
 python3 -m venv backend/.venv
@@ -80,3 +103,30 @@ Main endpoints: `GET /health`, `GET /api/mission/state`, `GET /api/telemetry`, `
 ---
 
 *Disclaimer: This is a hackathon engineering prototype based on simulated telemetry and physics-informed correlation. Not certified for flight operations.*
+
+## Engineering & validation tools
+
+The **Engineering & Validation** section in the app describes the development workflow, embedded deployment path, proposed adoption model, and roadmap. The Python model-development tools use synthetic data only; they do not train or control the live browser simulator.
+
+Install the optional machine-learning dependencies into the backend virtual environment:
+
+```powershell
+backend\.venv\Scripts\python.exe -m pip install -r backend\requirements-ml.txt
+```
+
+From the project root, generate a reproducible synthetic dataset, train a decision tree, and evaluate it on a held-out split:
+
+```powershell
+Set-Location backend
+.venv\Scripts\python.exe -m app.ml.evaluate
+```
+
+The report is written to `backend/reports/synthetic_evaluation.json`. To export the fitted tree as readable C decision rules:
+
+```powershell
+.venv\Scripts\python.exe -m app.ml.export_c
+```
+
+The generated C source is written to `backend/generated/orbitguard_tree.c`. Its feature order is documented in that file and in `app/ml/simulate.py`.
+
+These metrics describe only the generated synthetic dataset and its fixed random train/test split. They are not measured spacecraft performance and do not establish flight readiness. The C output is an unvalidated starting point: compile, profile and test it on the target hardware before considering embedded or flight use. Hardware-in-the-loop replay, laboratory impact data and suitable open CubeSat telemetry remain required validation steps.

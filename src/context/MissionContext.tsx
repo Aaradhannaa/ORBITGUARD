@@ -90,6 +90,8 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
   const [replayIndex, setReplayIndex] = useState<number>(0);
   const replayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isRunningRef = useRef(true);
+  const resumeAfterVisibilityRef = useRef(false);
 
   // Refs for instances
   const simulatorRef = useRef<TelemetrySimulator | null>(null);
@@ -185,6 +187,7 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
 
     simulator.start();
+    isRunningRef.current = true;
     setIsRunning(true);
 
     return () => {
@@ -193,14 +196,38 @@ export const MissionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [flushBackendBatch]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        resumeAfterVisibilityRef.current = isRunningRef.current;
+        if (resumeAfterVisibilityRef.current) {
+          simulatorRef.current?.pause();
+          flushBackendBatch();
+          isRunningRef.current = false;
+          setIsRunning(false);
+        }
+      } else if (resumeAfterVisibilityRef.current) {
+        resumeAfterVisibilityRef.current = false;
+        simulatorRef.current?.start();
+        isRunningRef.current = true;
+        setIsRunning(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [flushBackendBatch]);
+
   const startSimulation = useCallback(() => {
     simulatorRef.current?.start();
+    isRunningRef.current = true;
     setIsRunning(true);
   }, []);
 
   const pauseSimulation = useCallback(() => {
     simulatorRef.current?.pause();
     flushBackendBatch();
+    isRunningRef.current = false;
     setIsRunning(false);
   }, [flushBackendBatch]);
 

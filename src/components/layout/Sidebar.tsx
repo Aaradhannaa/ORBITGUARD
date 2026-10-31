@@ -5,10 +5,11 @@ import {
   Activity, 
   ShieldAlert, 
   History, 
-  Sliders
+  Sliders,
+  Cpu
 } from 'lucide-react';
 
-export type NavTab = 'overview' | 'telemetry' | 'diagnosis' | 'history' | 'settings';
+export type NavTab = 'overview' | 'telemetry' | 'diagnosis' | 'history' | 'settings' | 'engineering';
 
 interface SidebarProps {
   currentTab: NavTab;
@@ -31,7 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
       badgeColor: 'bg-rose-500/15 text-rose-300 border border-rose-500/35'
     },
     { id: 'history' as NavTab, label: 'Event History', icon: History, count: events.length },
-    { id: 'settings' as NavTab, label: 'Mission Settings', icon: Sliders }
+    { id: 'settings' as NavTab, label: 'Mission Settings', icon: Sliders },
+    { id: 'engineering' as NavTab, label: 'Engineering & Validation', icon: Cpu }
   ];
 
   return (

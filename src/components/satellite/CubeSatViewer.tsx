@@ -1,10 +1,23 @@
 import React, { useRef, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import * as THREE from 'three';
 import { ProceduralSatellite, EarthBackground, OrbitPath } from './ProceduralSatellite';
 import { useMission } from '../../context/MissionContext';
 import { RotateCw, Compass, ShieldAlert } from 'lucide-react';
+
+const MovingWhiteLight: React.FC = () => {
+  const lightRef = useRef<THREE.DirectionalLight>(null);
+
+  useFrame(({ clock }) => {
+    if (!lightRef.current) return;
+    const time = clock.elapsedTime * 0.7;
+    lightRef.current.position.set(Math.cos(time) * 7, 3 + Math.sin(time * 0.6) * 2, Math.sin(time) * 7);
+  });
+
+  return <directionalLight ref={lightRef} color="#ffffff" intensity={2.2} />;
+};
 
 export const CubeSatViewer: React.FC = () => {
   const { satelliteAttitude, hasImpactDisturbance, latestTelemetry } = useMission();
@@ -38,12 +51,12 @@ export const CubeSatViewer: React.FC = () => {
   return (
     <div className="viewer-backdrop relative w-full h-full min-h-[460px] rounded-xl overflow-hidden flex flex-col select-none">
       {/* Top Floating Control Bar */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none gap-3">
+      <div className="viewer-topbar absolute top-4 left-4 right-4 z-10 flex items-center justify-between pointer-events-none gap-3">
         {/* Satellite Identity Pill */}
-        <div className="flex items-center space-x-2.5 bg-[#0e1218]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto shadow-lg">
+        <div className="viewer-identity flex items-center space-x-2.5 bg-[#0e1218]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto shadow-lg">
           <span className={`w-2 h-2 rounded-full ${hasImpactDisturbance ? 'bg-rose-500 animate-ping' : 'bg-emerald-400'}`} />
           <span className="text-xs font-semibold tracking-wider text-[#f4f0e8] font-editorial">
-            SPACECRAFT DIGITWIN
+            SPACECRAFT DIGITAL TWIN
           </span>
           <span className="text-[10px] text-[#9aa2ac] font-mono-tech border-l border-[rgba(240,230,215,0.12)] pl-2">
             OG-SAT-01
@@ -59,10 +72,10 @@ export const CubeSatViewer: React.FC = () => {
         )}
 
         {/* Cinematic View Angle Presets */}
-        <div className="flex items-center space-x-1 bg-[#0e1218]/90 backdrop-blur-md p-1 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto text-xs shadow-lg">
+        <div className="viewer-presets flex items-center space-x-1 bg-[#0e1218]/90 backdrop-blur-md p-1 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto text-xs shadow-lg">
           <button
             onClick={() => setView('HERO')}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium transition ${
+            className={`whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition ${
               cameraPreset === 'HERO' ? 'bg-[#d97742]/20 text-[#f4f0e8] border border-[#d97742]/40 shadow-sm' : 'text-[#8c939f] hover:text-[#f4f0e8]'
             }`}
           >
@@ -70,7 +83,7 @@ export const CubeSatViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setView('SOLAR')}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium transition ${
+            className={`whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition ${
               cameraPreset === 'SOLAR' ? 'bg-[#d97742]/20 text-[#f4f0e8] border border-[#d97742]/40 shadow-sm' : 'text-[#8c939f] hover:text-[#f4f0e8]'
             }`}
           >
@@ -78,7 +91,7 @@ export const CubeSatViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setView('NADIR')}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium transition ${
+            className={`whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition ${
               cameraPreset === 'NADIR' ? 'bg-[#d97742]/20 text-[#f4f0e8] border border-[#d97742]/40 shadow-sm' : 'text-[#8c939f] hover:text-[#f4f0e8]'
             }`}
           >
@@ -86,7 +99,7 @@ export const CubeSatViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setView('RAM')}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium transition ${
+            className={`whitespace-nowrap px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition ${
               cameraPreset === 'RAM' ? 'bg-[#d97742]/20 text-[#f4f0e8] border border-[#d97742]/40 shadow-sm' : 'text-[#8c939f] hover:text-[#f4f0e8]'
             }`}
           >
@@ -107,6 +120,7 @@ export const CubeSatViewer: React.FC = () => {
         <Canvas
           camera={{ position: [4.6, 2.6, 5.0], fov: 42 }}
           className="w-full h-full cursor-grab active:cursor-grabbing"
+          dpr={[1, 1.5]}
         >
           {/* Ambient Lighting */}
           <ambientLight intensity={0.45} />
@@ -131,6 +145,7 @@ export const CubeSatViewer: React.FC = () => {
             intensity={0.65}
             color="#2d527c"
           />
+          <MovingWhiteLight />
 
           {/* Deep Space Background Stars */}
           <Stars radius={100} depth={50} count={1400} factor={3.0} saturation={0.15} fade speed={0.35} />
@@ -177,7 +192,7 @@ export const CubeSatViewer: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#0e1218]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto text-[11px] text-[#8c939f] font-editorial shadow-lg">
+        <div className="viewer-interaction flex items-center space-x-2 bg-[#0e1218]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[rgba(240,230,215,0.08)] pointer-events-auto text-[11px] text-[#8c939f] font-editorial shadow-lg">
           <span>Interaction: <span className="text-[#ede8df]">Left-drag rotate · Right-drag pan · Scroll zoom</span></span>
         </div>
       </div>

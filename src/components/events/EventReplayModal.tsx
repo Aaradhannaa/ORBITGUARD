@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useMission } from '../../context/MissionContext';
 import { 
   X, 
@@ -11,7 +11,10 @@ import {
   Sun, 
   Zap
 } from 'lucide-react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+
+const ReplayTelemetryChart = lazy(() =>
+  import('./ReplayTelemetryChart').then(({ ReplayTelemetryChart }) => ({ default: ReplayTelemetryChart }))
+);
 
 export const EventReplayModal: React.FC = () => {
   const { replayEvent, isReplaying, replayIndex, startReplay, stopReplay, setReplayIndex } = useMission();
@@ -149,30 +152,9 @@ export const EventReplayModal: React.FC = () => {
             SYNCHRONIZED TELEMETRY PLAYHEAD TRACE
           </div>
           <div className="h-44 w-full bg-[#080a0e] rounded-xl p-2 border border-[rgba(240,230,215,0.06)]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={replayEvent.telemetryWindow.map((p, idx) => ({
-                  idx,
-                  time: p.timeString.substring(6, 12),
-                  wMag: p.imu.wMagnitude,
-                  solar: p.solarCurrent.current,
-                  bMag: p.magnetometer.bMagnitude
-                }))}
-                margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-              >
-                <XAxis dataKey="time" stroke="#525d6d" fontSize={9} />
-                <YAxis stroke="#525d6d" fontSize={9} />
-                <Tooltip />
-                <ReferenceLine
-                  x={replayEvent.telemetryWindow[replayIndex]?.timeString.substring(6, 12)}
-                  stroke="#d97742"
-                  strokeWidth={2}
-                  label={{ value: 'PLAYHEAD', fill: '#d97742', fontSize: 9, position: 'top' }}
-                />
-                <Line type="monotone" dataKey="wMag" name="IMU (deg/s)" stroke="#d97742" strokeWidth={2} dot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="solar" name="Solar (A)" stroke="#fbbf24" strokeWidth={1.6} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<div className="h-full" aria-label="Loading replay chart" />}>
+              <ReplayTelemetryChart event={replayEvent} replayIndex={replayIndex} />
+            </Suspense>
           </div>
         </div>
 
