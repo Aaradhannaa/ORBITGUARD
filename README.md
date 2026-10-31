@@ -58,13 +58,13 @@ Open `http://localhost:5173` in your browser.
 
 The public demo is a frontend-only static site. The browser simulator remains active, while the API is deliberately disabled in the hosted build because the prototype API currently has unauthenticated write and delete endpoints. The public deployment therefore does not connect to or expose the SQLite backend.
 
-The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. To publish it:
+The repository includes a GitHub Actions workflow at `.github/workflows/pages.yml`. It deploys pushes to `main` or `orbitguard-pages-demo`. To publish it:
 
 1. Push the `main` branch to GitHub.
 2. In the repository, open **Settings → Pages** and set the build and deployment source to **GitHub Actions**.
 3. Wait for the **Deploy OrbitGuard demo** workflow to complete.
 
-The site URL will be `https://jayanthv-git.github.io/OrbitGuard/`. Updates pushed to `main` redeploy automatically. The local app continues to use `http://localhost:8000` by default; only the Pages build disables backend requests.
+The site URL for `Aaradhannaa/ORBITGUARD` will be `https://aaradhannaa.github.io/ORBITGUARD/`. Updates pushed to either deployment branch redeploy automatically. The local app continues to use `http://localhost:8000` by default; only the Pages build disables backend requests.
 
 ### 2. Production Build
 ```bash
